@@ -46,9 +46,11 @@ const Sidebar = () => {
     >
       {/* Brand */}
       <div className="flex h-16 items-center gap-3 px-4 border-b border-sidebar-border">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg gradient-primary">
-          <Shield className="h-5 w-5 text-primary-foreground" />
-        </div>
+        <img 
+          src="https://i.pinimg.com/736x/88/0c/08/880c084be8fcdc48e0946caec823e7a8.jpg" 
+          alt="Nexus Logo" 
+          className="h-9 w-9 shrink-0 rounded-lg object-cover"
+        />
         {!collapsed && (
           <div className="animate-fade-in">
             <h1 className="text-sm font-bold text-sidebar-foreground tracking-wide">NEXUS</h1>

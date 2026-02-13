@@ -3,6 +3,9 @@ import StatCard from "@/components/dashboard/StatCard";
 import { Users, UserCheck, Clock, TrendingUp, Fingerprint } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { attendanceService } from "@/services/attendance.service";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   AreaChart,
   Area,
@@ -13,37 +16,62 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const weekData = [
-  { day: "Mon", hours: 8.2 },
-  { day: "Tue", hours: 7.5 },
-  { day: "Wed", hours: 8.8 },
-  { day: "Thu", hours: 7.0 },
-  { day: "Fri", hours: 8.5 },
-  { day: "Sat", hours: 0 },
-  { day: "Sun", hours: 0 },
-];
-
-const recentActivity = [
-  { date: "Today", checkIn: "08:15 AM", checkOut: "—", hours: "Ongoing", status: "checked-in" as const },
-  { date: "Yesterday", checkIn: "08:02 AM", checkOut: "05:35 PM", hours: "9h 33m", status: "checked-out" as const },
-  { date: "Feb 11", checkIn: "07:55 AM", checkOut: "05:10 PM", hours: "9h 15m", status: "checked-out" as const },
-  { date: "Feb 10", checkIn: "08:30 AM", checkOut: "05:45 PM", hours: "9h 15m", status: "checked-out" as const },
-  { date: "Feb 9", checkIn: "—", checkOut: "—", hours: "—", status: "absent" as const },
-];
-
-const statusColors = {
-  "checked-in": "bg-success/10 text-success",
-  "checked-out": "bg-info/10 text-info",
-  absent: "bg-destructive/10 text-destructive",
-};
-
 const DashboardPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  const { data: todayStatus, isLoading: statusLoading } = useQuery({
+    queryKey: ['todayStatus'],
+    queryFn: () => attendanceService.getTodayStatus(),
+  });
+
+  const { data: attendanceHistory = [], isLoading: historyLoading } = useQuery({
+    queryKey: ['attendanceHistory', 7],
+    queryFn: () => attendanceService.getHistory(7, 0),
+  });
+
+  const weekData = attendanceHistory.slice(0, 7).reverse().map((record, i) => {
+    const date = new Date(record.check_in);
+    return {
+      day: date.toLocaleDateString('en-US', { weekday: 'short' }),
+      hours: record.total_hours || 0,
+    };
+  });
+
+  const recentActivity = attendanceHistory.slice(0, 5).map((record) => {
+    const date = new Date(record.check_in);
+    const isToday = date.toDateString() === new Date().toDateString();
+    return {
+      date: isToday ? 'Today' : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      checkIn: date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+      checkOut: record.check_out ? new Date(record.check_out).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '—',
+      hours: record.total_hours ? `${record.total_hours}h` : 'Ongoing',
+      status: record.status,
+    };
+  });
+
+  const totalHours = attendanceHistory.reduce((sum, r) => sum + (r.total_hours || 0), 0);
+  const daysPresent = attendanceHistory.filter(r => r.status === 'checked-out').length;
+
+  const statusColors = {
+    "checked-in": "bg-success/10 text-success",
+    "checked-out": "bg-info/10 text-info",
+    absent: "bg-destructive/10 text-destructive",
+  };
+
+  if (statusLoading || historyLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-20 w-full" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-32" />)}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
@@ -56,15 +84,34 @@ const DashboardPage = () => {
         </Button>
       </div>
 
-      {/* Stat cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Status" value="Checked In" subtitle="Since 08:15 AM" icon={UserCheck} variant="success" />
-        <StatCard title="Today's Hours" value="5h 42m" subtitle="Avg: 8.2h" icon={Clock} />
-        <StatCard title="This Week" value="32.5h" subtitle="Target: 40h" icon={TrendingUp} trend={{ value: 4.2, positive: true }} />
-        <StatCard title="Days Present" value="18 / 20" subtitle="This month" icon={Users} />
+        <StatCard 
+          title="Status" 
+          value={todayStatus?.status === 'checked-in' ? 'Checked In' : 'Not Checked In'} 
+          subtitle={todayStatus ? `Since ${new Date(todayStatus.check_in).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}` : 'No activity today'} 
+          icon={UserCheck} 
+          variant={todayStatus?.status === 'checked-in' ? 'success' : 'default'} 
+        />
+        <StatCard 
+          title="Today's Hours" 
+          value={todayStatus?.total_hours ? `${todayStatus.total_hours}h` : '0h'} 
+          subtitle="Current session" 
+          icon={Clock} 
+        />
+        <StatCard 
+          title="This Week" 
+          value={`${totalHours.toFixed(1)}h`} 
+          subtitle="Total hours" 
+          icon={TrendingUp} 
+        />
+        <StatCard 
+          title="Days Present" 
+          value={`${daysPresent} / 7`} 
+          subtitle="This week" 
+          icon={Users} 
+        />
       </div>
 
-      {/* Charts + Activity */}
       <div className="grid gap-6 lg:grid-cols-5">
         <div className="lg:col-span-3 rounded-xl bg-card p-5 shadow-card">
           <h2 className="text-sm font-semibold mb-4">Weekly Hours</h2>
@@ -88,7 +135,7 @@ const DashboardPage = () => {
         <div className="lg:col-span-2 rounded-xl bg-card p-5 shadow-card">
           <h2 className="text-sm font-semibold mb-4">Recent Activity</h2>
           <div className="space-y-3">
-            {recentActivity.map((r, i) => (
+            {recentActivity.length > 0 ? recentActivity.map((r, i) => (
               <div key={i} className="flex items-center justify-between text-sm border-b border-border pb-3 last:border-0 last:pb-0">
                 <div>
                   <p className="font-medium">{r.date}</p>
@@ -101,7 +148,9 @@ const DashboardPage = () => {
                   </span>
                 </div>
               </div>
-            ))}
+            )) : (
+              <p className="text-sm text-muted-foreground text-center py-4">No recent activity</p>
+            )}
           </div>
         </div>
       </div>

@@ -41,7 +41,7 @@ const LoginPage = () => {
       await login({ email: data.email, password: data.password, remember: data.remember });
       navigate("/dashboard");
     } catch {
-      toast({ title: "Login failed", description: "Invalid email or password. Try admin@nexus.com or user@nexus.com", variant: "destructive" });
+      toast({ title: "Login failed", description: "Invalid email or password.", variant: "destructive" });
     }
   };
 
@@ -50,9 +50,11 @@ const LoginPage = () => {
       {/* Left panel */}
       <div className="hidden lg:flex lg:w-1/2 gradient-primary flex-col justify-between p-12">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-foreground/20">
-            <Shield className="h-6 w-6 text-primary-foreground" />
-          </div>
+          <img 
+            src="https://i.pinimg.com/736x/88/0c/08/880c084be8fcdc48e0946caec823e7a8.jpg" 
+            alt="Nexus Logo" 
+            className="h-10 w-10 rounded-xl object-cover"
+          />
           <span className="text-xl font-bold text-primary-foreground tracking-wide">NEXUS</span>
         </div>
         <div className="space-y-4">
@@ -70,9 +72,11 @@ const LoginPage = () => {
       <div className="flex flex-1 items-center justify-center p-6 bg-background">
         <div className="w-full max-w-sm space-y-8 animate-slide-up">
           <div className="lg:hidden flex items-center gap-3 justify-center mb-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary">
-              <Shield className="h-6 w-6 text-primary-foreground" />
-            </div>
+            <img 
+              src="https://i.pinimg.com/736x/88/0c/08/880c084be8fcdc48e0946caec823e7a8.jpg" 
+              alt="Nexus Logo" 
+              className="h-10 w-10 rounded-xl object-cover"
+            />
             <span className="text-xl font-bold tracking-wide">NEXUS</span>
           </div>
 
@@ -100,7 +104,7 @@ const LoginPage = () => {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Any password works"
+                  placeholder="Enter password"
                   {...register("password")}
                   className={errors.password ? "border-destructive" : ""}
                 />
@@ -137,13 +141,6 @@ const LoginPage = () => {
             Don't have an account?{" "}
             <Link to="/register" className="font-medium text-primary hover:underline">Sign up</Link>
           </p>
-
-          <div className="rounded-lg bg-muted p-3 text-xs text-muted-foreground space-y-1">
-            <p className="font-medium">Demo Credentials:</p>
-            <p>Admin: admin@nexus.com</p>
-            <p>User: user@nexus.com</p>
-            <p>Password: any value</p>
-          </div>
         </div>
       </div>
     </div>

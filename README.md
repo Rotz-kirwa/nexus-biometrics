@@ -1,73 +1,191 @@
-# Welcome to your Lovable project
+# Nexus Biometrics Frontend
 
-## Project info
+> Professional biometric attendance management system built with React, TypeScript, and Vite.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## 🚀 Quick Start
 
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### Development
+```bash
+npm install
 npm run dev
 ```
+App runs on: `http://localhost:8080`
 
-**Edit a file directly in GitHub**
+### Production Build
+```bash
+npm run build
+npm run preview
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+## 🎯 Demo Mode (No Backend Required)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+**Login Credentials:**
+- Email: `admin@nexus.com`
+- Password: `Admin@123`
 
-## What technologies are used for this project?
+The app works in **demo mode** when no backend is configured. All features are functional with mock data.
 
-This project is built with:
+---
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🔧 Configuration
 
-## How can I deploy this project?
+### Environment Variables
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+Create `.env` file:
+```env
+# Leave empty for demo mode
+VITE_API_URL=
 
-## Can I connect a custom domain to my Lovable project?
+# Or set your backend URL
+VITE_API_URL=https://your-backend-api.com
+```
 
-Yes, you can!
+---
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 📦 Tech Stack
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- **React 18** - UI library
+- **TypeScript** - Type safety
+- **Vite** - Build tool
+- **Tailwind CSS** - Styling
+- **shadcn/ui** - Component library
+- **React Query** - Data fetching
+- **React Router** - Navigation
+- **Axios** - HTTP client
+- **Recharts** - Data visualization
+
+---
+
+## 🎨 Features
+
+### User Features
+- ✅ Login/Logout
+- ✅ Registration
+- ✅ Check-in/Check-out
+- ✅ Attendance history
+- ✅ Personal dashboard
+- ✅ Profile management
+
+### Admin Features
+- ✅ User management
+- ✅ System statistics
+- ✅ Dashboard analytics
+- ✅ Attendance reports
+
+---
+
+## 🚀 Deploy to Vercel
+
+### Quick Deploy
+```bash
+npm i -g vercel
+vercel login
+vercel --prod
+```
+
+### Or via GitHub
+1. Push to GitHub
+2. Import to Vercel
+3. Deploy!
+
+**See [VERCEL_DEPLOY.md](./VERCEL_DEPLOY.md) for detailed instructions.**
+
+---
+
+## 📁 Project Structure
+
+```
+src/
+├── components/     # Reusable components
+├── pages/          # Page components
+├── services/       # API services
+├── contexts/       # React contexts
+├── hooks/          # Custom hooks
+├── types/          # TypeScript types
+└── lib/            # Utilities
+```
+
+---
+
+## 🔌 Backend Integration
+
+The app automatically detects if a backend is available:
+
+**With Backend:**
+- Set `VITE_API_URL` to your API
+- Real data persistence
+- Multi-user support
+
+**Without Backend (Demo Mode):**
+- Works standalone
+- Mock data
+- Single user (admin)
+
+**Backend Repository:** [Nexus-Biometrics-Backend-Project](../Nexus-Biometrics-Backend-Project)
+
+---
+
+## 📖 Documentation
+
+- [Integration Guide](./INTEGRATION.md) - Backend integration details
+- [Quick Start](./QUICKSTART.md) - Getting started guide
+- [Vercel Deploy](./VERCEL_DEPLOY.md) - Deployment instructions
+
+---
+
+## 🧪 Testing
+
+```bash
+npm run test        # Run tests
+npm run test:watch  # Watch mode
+```
+
+---
+
+## 📝 Scripts
+
+```bash
+npm run dev         # Start dev server
+npm run build       # Production build
+npm run preview     # Preview build
+npm run lint        # Run linter
+npm run test        # Run tests
+```
+
+---
+
+## 🎯 Browser Support
+
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
+
+---
+
+## 📄 License
+
+MIT License - feel free to use for personal or commercial projects.
+
+---
+
+## 🤝 Contributing
+
+Contributions welcome! Please open an issue or submit a PR.
+
+---
+
+## 📞 Support
+
+**Issues?**
+- Check [INTEGRATION.md](./INTEGRATION.md) for troubleshooting
+- Open a GitHub issue
+- Check browser console for errors
+
+---
+
+## ✨ Credits
+
+Built with ❤️ using modern web technologies.

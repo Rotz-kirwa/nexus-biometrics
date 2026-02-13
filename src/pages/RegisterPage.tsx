@@ -71,9 +71,11 @@ const RegisterPage = () => {
     <div className="flex min-h-screen items-center justify-center bg-background p-6">
       <div className="w-full max-w-md space-y-8 animate-slide-up">
         <div className="flex items-center gap-3 justify-center">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary">
-            <Shield className="h-6 w-6 text-primary-foreground" />
-          </div>
+          <img 
+            src="https://i.pinimg.com/736x/88/0c/08/880c084be8fcdc48e0946caec823e7a8.jpg" 
+            alt="Nexus Logo" 
+            className="h-10 w-10 rounded-xl object-cover"
+          />
           <span className="text-xl font-bold tracking-wide">NEXUS</span>
         </div>
 

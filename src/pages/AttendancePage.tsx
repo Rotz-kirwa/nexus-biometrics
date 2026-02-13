@@ -4,20 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import StatCard from "@/components/dashboard/StatCard";
 import { cn } from "@/lib/utils";
-
-const records = Array.from({ length: 20 }, (_, i) => {
-  const d = new Date();
-  d.setDate(d.getDate() - i);
-  const absent = i === 4 || i === 11;
-  return {
-    id: String(i),
-    date: d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-    checkIn: absent ? "—" : `0${7 + (i % 2)}:${String(15 + (i * 7) % 45).padStart(2, "0")} AM`,
-    checkOut: absent ? "—" : `0${4 + (i % 2)}:${String(10 + (i * 3) % 50).padStart(2, "0")} PM`,
-    hours: absent ? 0 : +(7.5 + Math.random() * 2).toFixed(1),
-    status: absent ? "absent" : i === 0 ? "checked-in" : "checked-out" as string,
-  };
-});
+import { useQuery } from "@tanstack/react-query";
+import { attendanceService } from "@/services/attendance.service";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const statusBadge: Record<string, string> = {
   "checked-in": "bg-success/10 text-success",
@@ -28,9 +17,31 @@ const statusBadge: Record<string, string> = {
 const AttendancePage = () => {
   const [search, setSearch] = useState("");
 
-  const filtered = records.filter((r) =>
-    r.date.toLowerCase().includes(search.toLowerCase())
-  );
+  const { data: records = [], isLoading } = useQuery({
+    queryKey: ['attendanceHistory', 30],
+    queryFn: () => attendanceService.getHistory(30, 0),
+  });
+
+  const filtered = records.filter((r) => {
+    const date = new Date(r.check_in).toLocaleDateString();
+    return date.toLowerCase().includes(search.toLowerCase());
+  });
+
+  const daysPresent = records.filter(r => r.status === 'checked-out').length;
+  const totalHours = records.reduce((sum, r) => sum + (r.total_hours || 0), 0);
+  const avgHours = daysPresent > 0 ? (totalHours / daysPresent).toFixed(1) : 0;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-20 w-full" />
+        <div className="grid gap-4 sm:grid-cols-3">
+          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-32" />)}
+        </div>
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -45,12 +56,11 @@ const AttendancePage = () => {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard title="Days Present" value="18" subtitle="This month" icon={CalendarIcon} />
-        <StatCard title="Total Hours" value="152.5h" subtitle="Avg 8.5h / day" icon={Clock} />
-        <StatCard title="On-time Rate" value="94%" subtitle="2 late arrivals" icon={Filter} trend={{ value: 2, positive: true }} />
+        <StatCard title="Days Present" value={daysPresent.toString()} subtitle="Last 30 days" icon={CalendarIcon} />
+        <StatCard title="Total Hours" value={`${totalHours.toFixed(1)}h`} subtitle={`Avg ${avgHours}h / day`} icon={Clock} />
+        <StatCard title="Records" value={records.length.toString()} subtitle="Total entries" icon={Filter} />
       </div>
 
-      {/* Table */}
       <div className="rounded-xl bg-card shadow-card overflow-hidden">
         <div className="p-4 border-b border-border">
           <Input
@@ -72,19 +82,29 @@ const AttendancePage = () => {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((r) => (
-                <tr key={r.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                  <td className="px-4 py-3 font-medium">{r.date}</td>
-                  <td className="px-4 py-3 font-mono text-xs">{r.checkIn}</td>
-                  <td className="px-4 py-3 font-mono text-xs">{r.checkOut}</td>
-                  <td className="px-4 py-3 font-mono text-xs">{r.hours > 0 ? `${r.hours}h` : "—"}</td>
-                  <td className="px-4 py-3">
-                    <span className={cn("inline-block rounded-full px-2.5 py-0.5 text-xs font-medium", statusBadge[r.status])}>
-                      {r.status.replace("-", " ")}
-                    </span>
+              {filtered.length > 0 ? filtered.map((r) => {
+                const checkInDate = new Date(r.check_in);
+                const checkOutDate = r.check_out ? new Date(r.check_out) : null;
+                return (
+                  <tr key={r.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+                    <td className="px-4 py-3 font-medium">{checkInDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
+                    <td className="px-4 py-3 font-mono text-xs">{checkInDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</td>
+                    <td className="px-4 py-3 font-mono text-xs">{checkOutDate ? checkOutDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '—'}</td>
+                    <td className="px-4 py-3 font-mono text-xs">{r.total_hours ? `${r.total_hours}h` : '—'}</td>
+                    <td className="px-4 py-3">
+                      <span className={cn("inline-block rounded-full px-2.5 py-0.5 text-xs font-medium", statusBadge[r.status])}>
+                        {r.status.replace("-", " ")}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              }) : (
+                <tr>
+                  <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+                    No attendance records found
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

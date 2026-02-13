@@ -10,24 +10,33 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-
-const users = [
-  { id: "1", name: "Sarah Chen", email: "admin@nexus.com", role: "admin", department: "Engineering", status: "active" },
-  { id: "2", name: "James Wilson", email: "user@nexus.com", role: "user", department: "Operations", status: "active" },
-  { id: "3", name: "Emily Rodriguez", email: "emily@nexus.com", role: "user", department: "Marketing", status: "active" },
-  { id: "4", name: "Michael Park", email: "michael@nexus.com", role: "user", department: "Sales", status: "inactive" },
-  { id: "5", name: "Aisha Patel", email: "aisha@nexus.com", role: "user", department: "Engineering", status: "active" },
-  { id: "6", name: "David Kim", email: "david@nexus.com", role: "user", department: "Operations", status: "active" },
-];
+import { useQuery } from "@tanstack/react-query";
+import { adminService } from "@/services/admin.service";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const AdminUsersPage = () => {
   const [search, setSearch] = useState("");
 
+  const { data: users = [], isLoading } = useQuery({
+    queryKey: ['adminUsers'],
+    queryFn: () => adminService.getUsers(),
+  });
+
   const filtered = users.filter(
     (u) =>
-      u.name.toLowerCase().includes(search.toLowerCase()) ||
+      u.first_name.toLowerCase().includes(search.toLowerCase()) ||
+      u.last_name.toLowerCase().includes(search.toLowerCase()) ||
       u.email.toLowerCase().includes(search.toLowerCase())
   );
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-20 w-full" />
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -65,15 +74,15 @@ const AdminUsersPage = () => {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((u) => (
+              {filtered.length > 0 ? filtered.map((u) => (
                 <tr key={u.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                        {u.name.split(" ").map((n) => n[0]).join("")}
+                        {u.first_name[0]}{u.last_name[0]}
                       </div>
                       <div>
-                        <p className="font-medium">{u.name}</p>
+                        <p className="font-medium">{u.first_name} {u.last_name}</p>
                         <p className="text-xs text-muted-foreground">{u.email}</p>
                       </div>
                     </div>
@@ -83,13 +92,13 @@ const AdminUsersPage = () => {
                       {u.role}
                     </Badge>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">{u.department}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{u.department || '—'}</td>
                   <td className="px-4 py-3">
                     <div className={cn("flex items-center gap-1.5 text-xs font-medium",
-                      u.status === "active" ? "text-success" : "text-muted-foreground"
+                      u.is_active ? "text-success" : "text-muted-foreground"
                     )}>
-                      {u.status === "active" ? <UserCheck className="h-3.5 w-3.5" /> : <UserX className="h-3.5 w-3.5" />}
-                      {u.status}
+                      {u.is_active ? <UserCheck className="h-3.5 w-3.5" /> : <UserX className="h-3.5 w-3.5" />}
+                      {u.is_active ? 'active' : 'inactive'}
                     </div>
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -107,7 +116,13 @@ const AdminUsersPage = () => {
                     </DropdownMenu>
                   </td>
                 </tr>
-              ))}
+              )) : (
+                <tr>
+                  <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+                    No users found
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
